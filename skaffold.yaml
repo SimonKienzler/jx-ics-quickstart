@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/simon-kienzler/jx-ics-quickstart:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/simon-kienzler/jx-ics-quickstart:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jx-ics-quickstart
+        chartPath: charts/jx-ics-quickstart
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/simon-kienzler/jx-ics-quickstart'
+          image.tag: '{{.DIGEST_HEX}}'
